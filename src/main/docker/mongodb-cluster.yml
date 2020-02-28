@@ -3,7 +3,7 @@ services:
   users-mongodb:
     image: mongo:4.0.16
     ports:
-      - '27017:27017'
+      - '27081:27017'
     command: mongos --configdb users-mongodb-config
   users-mongodb-node:
     build:
