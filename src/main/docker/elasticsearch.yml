@@ -1,6 +1,6 @@
 version: '2'
 services:
-  users-elasticsearch:
+  elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.8.6
     # volumes:
     #     - ~/volumes/jhipster/users/elasticsearch/:/usr/share/elasticsearch/data/
