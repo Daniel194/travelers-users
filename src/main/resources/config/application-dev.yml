@@ -66,6 +66,8 @@ spring:
       properties:
         path:
           home: build/elasticsearch
+    jest:
+      uri: http://localhost:9200
   mail:
     host: localhost
     port: 25
@@ -98,6 +100,7 @@ jhipster:
   cache: # Cache configuration
     redis: # Redis configuration
       expiration: 3600 # By default objects stay 1 hour (in seconds) in the cache
+      server: redis://localhost:6381
   # CORS is disabled by default on microservices, as you should access them through a gateway.
   # If you want to enable it, please uncomment the configuration below.
   # cors:
