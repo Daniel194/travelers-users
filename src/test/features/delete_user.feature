@@ -2,7 +2,7 @@ Feature: Delete user
     Delete user account details with login identifier
 
     Background:
-        Given an user with the following attributes
+        Given user with the following attributes
             | id  | login | firstName | lastName | email         | imageUrl        | description    | dateOfBirth | placeOfBirth |
             | 300 | test  | TestFirst | TestLast | test@test.com | http://test.com | TestDesciption | 1990-01-01  | GRL          |
 

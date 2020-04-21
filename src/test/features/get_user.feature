@@ -2,7 +2,7 @@ Feature: Get user
     Get user details from the platform
 
     Background:
-        Given an user with the following attributes
+        Given user with the following attributes
             | id  | login | firstName | lastName | email         | imageUrl        | description    | dateOfBirth | placeOfBirth |
             | 300 | test  | TestFirst | TestLast | test@test.com | http://test.com | TestDesciption | 1990-01-01  | GRL          |
 
@@ -22,7 +22,7 @@ Feature: Get user
 
 
     Scenario: Get current
-        When user 'test' is login and want to see its account details
+        When user 'test' is login and wants to see its account details
         Then the response is 'SUCCESSFUL'
         And following account details is returned
             | id  | login | firstName | lastName | email         | imageUrl        | description    | dateOfBirth | placeOfBirth |
