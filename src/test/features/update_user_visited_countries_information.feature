@@ -17,14 +17,14 @@ Feature: Update user visited countries information
             | login | country |
             | test  | BGR     |
         When user add a new visited country
-        Then the update is 'SUCCESSFUL'
+        Then the update countries is 'SUCCESSFUL'
 
         When user wants to get account details of 'test'
         Then the response is 'SUCCESSFUL'
         And following account details is returned
             | id  | login | firstName | lastName | email         | imageUrl        | description    | dateOfBirth | placeOfBirth |
             | 300 | test  | TestFirst | TestLast | test@test.com | http://test.com | TestDesciption | 1990-01-01  | GRL          |
-        And with the following visited countries
+        And with the following visited countries is returned
             | ARM | 2 |
             | BRA | 1 |
             | BGR | 1 |
@@ -34,14 +34,14 @@ Feature: Update user visited countries information
             | login | country |
             | test  | BRA     |
         When user add a new visited country
-        Then the update is 'SUCCESSFUL'
+        Then the update countries is 'SUCCESSFUL'
 
         When user wants to get account details of 'test'
         Then the response is 'SUCCESSFUL'
         And following account details is returned
             | id  | login | firstName | lastName | email         | imageUrl        | description    | dateOfBirth | placeOfBirth |
             | 300 | test  | TestFirst | TestLast | test@test.com | http://test.com | TestDesciption | 1990-01-01  | GRL          |
-        And with the following visited countries
+        And with the following visited countries is returned
             | ARM | 2 |
             | BRA | 2 |
 
@@ -50,12 +50,12 @@ Feature: Update user visited countries information
             | login | country |
             | test  | BRA     |
         When user remove a visited country
-        Then the update is 'SUCCESSFUL'
+        Then the update countries is 'SUCCESSFUL'
 
         When user wants to get account details of 'test'
         Then the response is 'SUCCESSFUL'
         And following account details is returned
             | id  | login | firstName | lastName | email         | imageUrl        | description    | dateOfBirth | placeOfBirth |
             | 300 | test  | TestFirst | TestLast | test@test.com | http://test.com | TestDesciption | 1990-01-01  | GRL          |
-        And with the following visited countries
+        And with the following visited countries is returned
             | ARM | 2 |
