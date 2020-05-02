@@ -120,7 +120,7 @@ spring:
     execution:
       thread-name-prefix: users-task-
       pool:
-        core-size: 4
+        core-size: 5
         max-size: 50
         queue-capacity: 10000
     scheduling:

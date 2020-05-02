@@ -31,6 +31,7 @@ public class UserConsumerService {
     private KafkaConsumer<String, String> updateUser;
     private KafkaConsumer<String, String> addCountry;
     private KafkaConsumer<String, String> removeCountry;
+    private KafkaConsumer<String, String> deleteUser;
 
     @Autowired
     public UserConsumerService(UserRepository userRepository, KafkaProperties kafkaProperties, UserMapper userMapper) {
@@ -64,6 +65,12 @@ public class UserConsumerService {
 
         removeCountry = new KafkaConsumer<>(removeCountryProps);
         removeCountry.subscribe(Collections.singleton("remove-country"));
+
+        Map<String, Object> deleteUserProps = kafkaProperties.getConsumerProps();
+        deleteUserProps.put(ConsumerConfig.GROUP_ID_CONFIG, "delete-user");
+
+        deleteUser = new KafkaConsumer<>(deleteUserProps);
+        deleteUser.subscribe(Collections.singleton("delete-user"));
     }
 
     public void consumeCreateNewUser() {
@@ -127,7 +134,7 @@ public class UserConsumerService {
             userRepository.save(user);
 
         } catch (Exception ex) {
-            log.trace("ERROR update-user: {}", ex.getMessage(), ex);
+            log.trace("ERROR add-country: {}", ex.getMessage(), ex);
         }
     }
 
@@ -153,6 +160,19 @@ public class UserConsumerService {
             }
 
             userRepository.save(user);
+
+        } catch (Exception ex) {
+            log.trace("ERROR remove-country: {}", ex.getMessage(), ex);
+        }
+    }
+
+    public void consumeDeleteUser() {
+        deleteUser.poll(Duration.ofSeconds(1)).forEach(record -> deleteUSer(record.value()));
+    }
+
+    private void deleteUSer(String login) {
+        try {
+            userRepository.deleteByLogin(login);
 
         } catch (Exception ex) {
             log.trace("ERROR update-user: {}", ex.getMessage(), ex);

@@ -138,6 +138,21 @@ class UserConsumerServiceTest {
         verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository);
     }
 
+    @Test
+    public void consumeDeleteUser() {
+        doReturn(getConsumerProps()).when(kafkaProperties).getConsumerProps();
+
+        KafkaProducer<String, String> producer = new KafkaProducer<>(getProducerProps());
+        producer.send(new ProducerRecord<>("delete-user", "test"));
+
+        userConsumerService.setUp();
+        userConsumerService.consumeDeleteUser();
+
+        verify(kafkaProperties, atLeast(1)).getConsumerProps();
+        verify(userRepository).deleteByLogin("test");
+        verifyNoMoreInteractions(kafkaProperties, userRepository);
+    }
+
     private Map<String, Object> getProducerProps() {
         Map<String, Object> producerProps = new HashMap<>();
         producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");

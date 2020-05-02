@@ -61,5 +61,15 @@ public class ApplicationReadyListener {
         }
     }
 
+    @Async("taskExecutor")
+    @EventListener(ApplicationReadyEvent.class)
+    public void startDeleteUser() {
+        log.info("START delete-user");
+
+        while (true) {
+            userConsumerService.consumeDeleteUser();
+        }
+    }
+
 }
 
