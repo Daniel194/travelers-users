@@ -30,7 +30,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @NotNull
     @Pattern(regexp = Constants.LOGIN_REGEX)
     @Size(min = 1, max = 50)
-    @Indexed
+    @Indexed(unique = true)
     private String login;
 
     @Size(max = 50)
@@ -43,7 +43,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     @Email
     @Size(min = 5, max = 254)
-    @Indexed
+    @Indexed(unique = true)
     private String email;
 
     @Size(max = 256)
