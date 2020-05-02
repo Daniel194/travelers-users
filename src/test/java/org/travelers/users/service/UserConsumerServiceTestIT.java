@@ -108,7 +108,7 @@ public class UserConsumerServiceTestIT {
     }
 
     @Test
-    public void removeCountry() throws JsonProcessingException {
+    public void consumeRemoveCountry() throws JsonProcessingException {
         User user = getUser();
         userRepository.save(user);
 
@@ -127,6 +127,19 @@ public class UserConsumerServiceTestIT {
         assertThat(newUser.getLogin()).isEqualTo(country.getLogin());
         assertThat(newUser.getVisitedCountries().get(country.getCountry())).isNotNull();
         assertThat(newUser.getVisitedCountries().get(country.getCountry())).isEqualTo(newCount);
+    }
+
+    @Test
+    public void consumeDeleteUser() {
+        User user = getUser();
+        userRepository.save(user);
+
+        KafkaProducer<String, String> producer = new KafkaProducer<>(new HashMap<>(getProducerProps()));
+        producer.send(new ProducerRecord<>("delete-user", user.getLogin()));
+
+        userConsumerService.consumeDeleteUser();
+
+        assertThat(userRepository.findByLogin(user.getLogin())).isEmpty();
     }
 
     private Map<String, String> getProducerProps() {
