@@ -10,6 +10,7 @@ import org.travelers.users.UsersApp;
 import org.travelers.users.domain.User;
 import org.travelers.users.repository.UserRepository;
 import org.travelers.users.service.dto.UserDTO;
+import org.travelers.users.service.dto.UserDetailsDTO;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.travelers.users.util.TestUtil.areEqual;
@@ -41,12 +42,36 @@ public class UserServiceTestIT {
 
         repository.save(user);
 
-        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(new UsernamePasswordAuthenticationToken(user.getLogin(), user.getLogin()));
-        SecurityContextHolder.setContext(securityContext);
+        setCurrentUser(user.getLogin());
 
         UserDTO userDTO = userService.getCurrent().orElse(new UserDTO());
 
         assertThat(areEqual(user, userDTO)).isTrue();
     }
+
+    @Test
+    public void update() {
+        User user = getUser();
+
+        repository.save(user);
+
+        setCurrentUser(user.getLogin());
+
+        UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
+        userDetailsDTO.setDescription("Test12345");
+
+        UserDTO userDTO = userService.update(userDetailsDTO).orElseThrow();
+
+        user.setDescription(userDetailsDTO.getDescription());
+
+        assertThat(userDTO.getDescription()).isEqualTo(userDetailsDTO.getDescription());
+    }
+
+
+    private void setCurrentUser(String login) {
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(new UsernamePasswordAuthenticationToken(login, login));
+        SecurityContextHolder.setContext(securityContext);
+    }
+
 }
