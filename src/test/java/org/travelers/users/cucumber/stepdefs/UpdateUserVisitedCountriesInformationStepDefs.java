@@ -6,7 +6,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.travelers.users.config.KafkaProperties;
@@ -16,8 +15,11 @@ public class UpdateUserVisitedCountriesInformationStepDefs extends StepDefs {
 
     private CountryDTO country;
 
-    @Autowired
-    private KafkaProperties kafkaProperties;
+    private final KafkaProperties kafkaProperties;
+
+    public UpdateUserVisitedCountriesInformationStepDefs(KafkaProperties kafkaProperties) {
+        this.kafkaProperties = kafkaProperties;
+    }
 
     @Given("log in user wants to add/remove a visited country with the following attributes")
     public void user_wants_add_visited_country_with_attributes(DataTable dataTable) {
@@ -43,8 +45,8 @@ public class UpdateUserVisitedCountriesInformationStepDefs extends StepDefs {
     }
 
     @Then("the update countries is 'SUCCESSFUL'")
-    public void updated_countries_is_successful() {
-
+    public void updated_countries_is_successful() throws InterruptedException {
+        Thread.sleep(5000);
     }
 
 }

@@ -13,12 +13,14 @@ import org.travelers.users.UsersApp;
 import org.travelers.users.config.KafkaProperties;
 import org.travelers.users.domain.User;
 import org.travelers.users.repository.UserRepository;
+import org.travelers.users.service.dto.CountryDTO;
 import org.travelers.users.service.dto.UserDTO;
 import org.travelers.users.service.mapper.UserMapper;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -93,6 +95,49 @@ class UserConsumerServiceTest {
         verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository);
     }
 
+    @Test
+    public void consumeAddCountry() throws JsonProcessingException {
+        consumeCountry(() -> {
+            userConsumerService.consumeAddCountry();
+            return null;
+        }, "add-country");
+    }
+
+    @Test
+    public void consumeRemoveCountry() throws JsonProcessingException {
+        consumeCountry(() -> {
+            userConsumerService.consumeRemoveCountry();
+            return null;
+        }, "remove-country");
+    }
+
+    private void consumeCountry(Supplier<Void> call, String topic) throws JsonProcessingException {
+        User user = getUser();
+        CountryDTO countryDTO = getCountry();
+        String countryJson = convertObjectToJson(countryDTO);
+
+        Map<String, Integer> visitedCountries = user.getVisitedCountries();
+        visitedCountries.put(countryDTO.getCountry(), 1);
+
+        user.setVisitedCountries(visitedCountries);
+
+        doReturn(getConsumerProps()).when(kafkaProperties).getConsumerProps();
+        doReturn(countryDTO).when(userMapper).mapToCountry(any(String.class));
+        doReturn(Optional.of(user)).when(userRepository).findByLogin(countryDTO.getLogin());
+
+        KafkaProducer<String, String> producer = new KafkaProducer<>(getProducerProps());
+        producer.send(new ProducerRecord<>(topic, countryJson));
+
+        userConsumerService.setUp();
+        call.get();
+
+        verify(kafkaProperties, atLeast(1)).getConsumerProps();
+        verify(userMapper).mapToCountry(any(String.class));
+        verify(userRepository).findByLogin(countryDTO.getLogin());
+        verify(userRepository).save(user);
+        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository);
+    }
+
     private Map<String, Object> getProducerProps() {
         Map<String, Object> producerProps = new HashMap<>();
         producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -109,6 +154,14 @@ class UserConsumerServiceTest {
         consumerProps.put("auto.offset.reset", "earliest");
 
         return consumerProps;
+    }
+
+    private CountryDTO getCountry() {
+        CountryDTO countryDTO = new CountryDTO();
+        countryDTO.setCountry("TST");
+        countryDTO.setLogin("Test");
+
+        return countryDTO;
     }
 
 }
