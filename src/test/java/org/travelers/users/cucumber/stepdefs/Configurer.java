@@ -66,7 +66,7 @@ public class Configurer implements TypeRegistryConfigurer {
         registry.defineDataTableType(new DataTableType(CountryDTO.class, (TableEntryTransformer<CountryDTO>) entry -> {
             CountryDTO country = new CountryDTO();
 
-            country.setCountry(entry.get("login"));
+            country.setLogin(entry.get("login"));
             country.setCountry(entry.get("country"));
 
             return country;

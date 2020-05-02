@@ -1,6 +1,7 @@
 package org.travelers.users.service.mapper;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.travelers.users.UsersApp;
 import org.travelers.users.domain.User;
+import org.travelers.users.service.dto.CountryDTO;
 import org.travelers.users.service.dto.UserDTO;
 
 import java.io.IOException;
@@ -84,6 +86,22 @@ class UserMapperTest {
         mapper.mapToJson(userDTO);
 
         verify(objectMapper).writeValueAsString(userDTO);
+        verifyNoMoreInteractions(objectMapper);
+    }
+
+    @Test
+    void mapCountry() throws JsonProcessingException {
+        CountryDTO countryDTO = new CountryDTO();
+        countryDTO.setCountry("TST");
+        countryDTO.setLogin("test");
+
+        String json = convertObjectToJson(countryDTO);
+
+        doReturn(countryDTO).when(objectMapper).readValue(json, CountryDTO.class);
+
+        mapper.mapToCountry(json);
+
+        verify(objectMapper).readValue(json, CountryDTO.class);
         verifyNoMoreInteractions(objectMapper);
     }
 

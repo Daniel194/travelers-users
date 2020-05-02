@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.travelers.users.domain.User;
+import org.travelers.users.service.dto.CountryDTO;
 import org.travelers.users.service.dto.UserDTO;
 
 import java.util.List;
@@ -68,4 +69,7 @@ public class UserMapper {
         return objectMapper.writeValueAsString(user);
     }
 
+    public CountryDTO mapToCountry(String countryJson) throws JsonProcessingException {
+        return objectMapper.readValue(countryJson, CountryDTO.class);
+    }
 }

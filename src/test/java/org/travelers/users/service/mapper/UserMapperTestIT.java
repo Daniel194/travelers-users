@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.travelers.users.UsersApp;
+import org.travelers.users.service.dto.CountryDTO;
 import org.travelers.users.service.dto.UserDTO;
 
 import java.io.IOException;
@@ -37,6 +38,19 @@ public class UserMapperTestIT {
         assertThat(json2).isNotNull();
         assertThat(json2).isNotEmpty();
         assertThat(json2).isNotBlank();
+    }
+
+    @Test
+    void mapToCountry() throws IOException {
+        CountryDTO countryDTO = new CountryDTO();
+        countryDTO.setCountry("TST");
+        countryDTO.setLogin("test");
+
+        String json = convertObjectToJson(countryDTO);
+
+        CountryDTO countryDTO2 = mapper.mapToCountry(json);
+
+        assertThat(countryDTO2.getLogin()).isEqualTo(countryDTO.getLogin());
     }
 
 }

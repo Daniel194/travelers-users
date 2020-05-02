@@ -41,5 +41,25 @@ public class ApplicationReadyListener {
         }
     }
 
+    @Async("taskExecutor")
+    @EventListener(ApplicationReadyEvent.class)
+    public void startAddCountry() {
+        log.info("START add-country");
+
+        while (true) {
+            userConsumerService.consumeAddCountry();
+        }
+    }
+
+    @Async("taskExecutor")
+    @EventListener(ApplicationReadyEvent.class)
+    public void startRemoveCountry() {
+        log.info("START remove-country");
+
+        while (true) {
+            userConsumerService.consumeRemoveCountry();
+        }
+    }
+
 }
 

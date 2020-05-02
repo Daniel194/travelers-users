@@ -39,7 +39,7 @@ public class UserDTO {
     @Size(min = 3, max = 3)
     private String placeOfBirth;
 
-    private Map<@Size(min = 3, max = 3) String, String> visitedCountries;
+    private Map<@Size(min = 3, max = 3) String, Integer> visitedCountries;
 
     private Map<String, String> socialPlatforms;
 
@@ -133,11 +133,11 @@ public class UserDTO {
         this.placeOfBirth = placeOfBirth;
     }
 
-    public Map<String, String> getVisitedCountries() {
+    public Map<String, Integer> getVisitedCountries() {
         return visitedCountries;
     }
 
-    public void setVisitedCountries(Map<String, String> visitedCountries) {
+    public void setVisitedCountries(Map<String, Integer> visitedCountries) {
         this.visitedCountries = visitedCountries;
     }
 

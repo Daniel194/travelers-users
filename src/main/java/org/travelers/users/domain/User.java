@@ -60,7 +60,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private String placeOfBirth;
 
     @Field("visited_countries")
-    private Map<@Size(min = 3, max = 3) String, String> visitedCountries;
+    private Map<@Size(min = 3, max = 3) String, Integer> visitedCountries;
 
     @Field("social_platforms")
     private Map<String, String> socialPlatforms;
@@ -137,11 +137,11 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.placeOfBirth = placeOfBirth;
     }
 
-    public Map<String, String> getVisitedCountries() {
+    public Map<String, Integer> getVisitedCountries() {
         return visitedCountries;
     }
 
-    public void setVisitedCountries(Map<String, String> visitedCountries) {
+    public void setVisitedCountries(Map<String, Integer> visitedCountries) {
         this.visitedCountries = visitedCountries;
     }
 

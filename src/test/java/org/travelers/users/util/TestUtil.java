@@ -22,6 +22,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -124,7 +125,7 @@ public final class TestUtil {
         user.setDateOfBirth(LocalDate.now());
         user.setPlaceOfBirth(RandomStringUtils.randomAlphanumeric(3));
         user.setSocialPlatforms(randomMap(3));
-        user.setVisitedCountries(randomMap(3));
+        user.setVisitedCountries(randomIntegerMap(3));
 
         return user;
     }
@@ -141,7 +142,7 @@ public final class TestUtil {
         user.setDateOfBirth(LocalDate.now());
         user.setPlaceOfBirth(RandomStringUtils.randomAlphanumeric(3));
         user.setSocialPlatforms(randomMap(3));
-        user.setVisitedCountries(randomMap(3));
+        user.setVisitedCountries(randomIntegerMap(3));
 
         return user;
     }
@@ -151,6 +152,16 @@ public final class TestUtil {
 
         for (int i = 0; i < size; i++) {
             map.put(RandomStringUtils.randomAlphanumeric(3), RandomStringUtils.randomAlphanumeric(3));
+        }
+
+        return map;
+    }
+
+    public static Map<String, Integer> randomIntegerMap(int size) {
+        Map<String, Integer> map = new HashMap<>();
+
+        for (int i = 0; i < size; i++) {
+            map.put(RandomStringUtils.randomAlphanumeric(3), ThreadLocalRandom.current().nextInt(1, 10));
         }
 
         return map;

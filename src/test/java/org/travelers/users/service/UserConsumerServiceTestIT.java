@@ -13,9 +13,11 @@ import org.travelers.users.UsersApp;
 import org.travelers.users.config.KafkaProperties;
 import org.travelers.users.domain.User;
 import org.travelers.users.repository.UserRepository;
+import org.travelers.users.service.dto.CountryDTO;
 import org.travelers.users.service.dto.UserDTO;
 import org.travelers.users.service.mapper.UserMapper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,6 +84,49 @@ public class UserConsumerServiceTestIT {
 
         assertThat(user.getEmail()).isNotEqualTo(newUser.getEmail());
         assertThat(userDTO.getEmail()).isEqualTo(newUser.getEmail());
+    }
+
+    @Test
+    public void consumeAddCountry() throws JsonProcessingException {
+        User user = getUser();
+        userRepository.save(user);
+
+        CountryDTO country = new CountryDTO();
+        country.setCountry("TST");
+        country.setLogin(user.getLogin());
+
+        KafkaProducer<String, String> producer = new KafkaProducer<>(new HashMap<>(getProducerProps()));
+        producer.send(new ProducerRecord<>("add-country", convertObjectToJson(country)));
+
+        userConsumerService.consumeAddCountry();
+
+        User newUser = userRepository.findByLogin(user.getLogin()).orElse(new User());
+
+        assertThat(newUser.getLogin()).isEqualTo(country.getLogin());
+        assertThat(newUser.getVisitedCountries().get(country.getCountry())).isNotNull();
+        assertThat(newUser.getVisitedCountries().get(country.getCountry())).isEqualTo(1);
+    }
+
+    @Test
+    public void removeCountry() throws JsonProcessingException {
+        User user = getUser();
+        userRepository.save(user);
+
+        CountryDTO country = new CountryDTO();
+        country.setLogin(user.getLogin());
+        country.setCountry(new ArrayList<>(user.getVisitedCountries().keySet()).get(0));
+
+        KafkaProducer<String, String> producer = new KafkaProducer<>(new HashMap<>(getProducerProps()));
+        producer.send(new ProducerRecord<>("remove-country", convertObjectToJson(country)));
+
+        userConsumerService.consumeRemoveCountry();
+
+        User newUser = userRepository.findByLogin(user.getLogin()).orElse(new User());
+        Integer newCount = user.getVisitedCountries().get(country.getCountry()) - 1;
+
+        assertThat(newUser.getLogin()).isEqualTo(country.getLogin());
+        assertThat(newUser.getVisitedCountries().get(country.getCountry())).isNotNull();
+        assertThat(newUser.getVisitedCountries().get(country.getCountry())).isEqualTo(newCount);
     }
 
     private Map<String, String> getProducerProps() {
