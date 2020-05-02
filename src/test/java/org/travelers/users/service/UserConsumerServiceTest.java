@@ -18,6 +18,7 @@ import org.travelers.users.service.mapper.UserMapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -62,9 +63,32 @@ class UserConsumerServiceTest {
         userConsumerService.setUp();
         userConsumerService.consumeCreateNewUser();
 
-        verify(kafkaProperties).getConsumerProps();
+        verify(kafkaProperties, atLeast(1)).getConsumerProps();
         verify(userMapper).mapToUser(any(String.class));
         verify(userMapper).userDTOToUser(userDTO);
+        verify(userRepository).save(user);
+        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository);
+    }
+
+    @Test
+    public void consumeUpdateUser() throws JsonProcessingException {
+        User user = getUser();
+        UserDTO userDTO = new UserDTO(user);
+        String userJson = convertObjectToJson(userDTO);
+
+        doReturn(getConsumerProps()).when(kafkaProperties).getConsumerProps();
+        doReturn(userDTO).when(userMapper).mapToUser(any(String.class));
+        doReturn(Optional.of(user)).when(userRepository).findByLogin(userDTO.getLogin());
+
+        KafkaProducer<String, String> producer = new KafkaProducer<>(getProducerProps());
+        producer.send(new ProducerRecord<>("update-user", userJson));
+
+        userConsumerService.setUp();
+        userConsumerService.consumeUpdateUser();
+
+        verify(kafkaProperties, atLeast(1)).getConsumerProps();
+        verify(userMapper).mapToUser(any(String.class));
+        verify(userRepository).findByLogin(userDTO.getLogin());
         verify(userRepository).save(user);
         verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository);
     }
@@ -83,8 +107,7 @@ class UserConsumerServiceTest {
         consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumerProps.put("bootstrap.servers", kafkaContainer.getBootstrapServers());
         consumerProps.put("auto.offset.reset", "earliest");
-        consumerProps.put("group.id", "default-group");
-        consumerProps.put("client.id", "default-client");
+
         return consumerProps;
     }
 
