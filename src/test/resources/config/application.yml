@@ -51,7 +51,7 @@ spring:
     execution:
       thread-name-prefix: users-task-
       pool:
-        core-size: 1
+        core-size: 2
         max-size: 50
         queue-capacity: 10000
     scheduling:
@@ -101,7 +101,6 @@ kafka:
   consumer:
     key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    group.id: users
     auto.offset.reset: earliest
   producer:
     key.serializer: org.apache.kafka.common.serialization.StringSerializer

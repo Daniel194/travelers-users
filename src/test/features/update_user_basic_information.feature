@@ -16,13 +16,12 @@ Feature: Update user basic information
         When user update the account with the new basic information '<testCase>'
         Then the update is '<expectedResult>'
         Examples:
-            | testCase                 | expectedResult | login   | firstName    | lastName    | email            | imageUrl           |
-            | WITH ALL FIELDS          | SUCCESSFUL     | test123 | TestFirst123 | TestLast123 | test123@test.com | http://test123.com |
-            | WITH ALL REQUIRED FIELDS | SUCCESSFUL     | test123 |              |             | test123@test.com |                    |
-            | WITHOUT EMAIL            | FAIL           | test123 |              |             |                  |                    |
-            | WITH INVALID EMAIL       | FAIL           | test123 |              |             | test&test<com    |                    |
-            | WITH EXISTING EMAIL      | FAIL           | test123 |              |             | other@other.com  |                    |
-            | WITHOUT LOGIN            | FAIL           |         |              |             | test@test.com    |                    |
-            | WITH INVALID LOGIN       | FAIL           | test$&  |              |             | test@test.com    |                    |
-            | WITH EXISTING LOGIN      | FAIL           | other   |              |             | test@test.com    |                    |
-            | WITHOUT ALL FIELDS       | FAIL           |         |              |             |                  |                    |
+            | testCase                 | expectedResult | login | firstName  | lastName  | email           | imageUrl         |
+            | WITH ALL FIELDS          | SUCCESSFUL     | test  | TestFirst1 | TestLast1 | test1@test.com  | http://test1.com |
+            | WITH ALL REQUIRED FIELDS | SUCCESSFUL     | test  |            |           | test2@test.com  |                  |
+            | WITHOUT EMAIL            | FAIL           | test  |            |           |                 |                  |
+            | WITH INVALID EMAIL       | FAIL           | test  |            |           | test&test<com   |                  |
+            | WITH EXISTING EMAIL      | FAIL           | test  |            |           | other@other.com |                  |
+            | WITHOUT LOGIN            | FAIL           |       |            |           | test@test.com   |                  |
+            | WITH INVALID LOGIN       | FAIL           | test1 |            |           | test@test.com   |                  |
+            | WITHOUT ALL FIELDS       | FAIL           |       |            |           |                 |                  |

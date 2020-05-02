@@ -31,5 +31,15 @@ public class ApplicationReadyListener {
         }
     }
 
+    @Async("taskExecutor")
+    @EventListener(ApplicationReadyEvent.class)
+    public void startUpdateUser() {
+        log.info("START update-user");
+
+        while (true) {
+            userConsumerService.consumeUpdateUser();
+        }
+    }
+
 }
 

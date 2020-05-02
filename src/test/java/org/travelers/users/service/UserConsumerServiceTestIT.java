@@ -52,7 +52,7 @@ public class UserConsumerServiceTestIT {
     }
 
     @Test
-    public void consumeCreateNewUser() throws JsonProcessingException, InterruptedException {
+    public void consumeCreateNewUser() throws JsonProcessingException {
         UserDTO userDTO = getUserDTO();
 
         KafkaProducer<String, String> producer = new KafkaProducer<>(new HashMap<>(getProducerProps()));
@@ -63,6 +63,25 @@ public class UserConsumerServiceTestIT {
         User user = userRepository.findByLogin(userDTO.getLogin()).orElse(new User());
 
         assertThat(areEqual(user, userDTO)).isTrue();
+    }
+
+    @Test
+    public void consumeUpdateUser() throws JsonProcessingException {
+        User user = getUser();
+        userRepository.save(user);
+
+        UserDTO userDTO = getUserDTO();
+        userDTO.setLogin(user.getLogin());
+
+        KafkaProducer<String, String> producer = new KafkaProducer<>(new HashMap<>(getProducerProps()));
+        producer.send(new ProducerRecord<>("update-user", convertObjectToJson(userDTO)));
+
+        userConsumerService.consumeUpdateUser();
+
+        User newUser = userRepository.findByLogin(user.getLogin()).orElse(new User());
+
+        assertThat(user.getEmail()).isNotEqualTo(newUser.getEmail());
+        assertThat(userDTO.getEmail()).isEqualTo(newUser.getEmail());
     }
 
     private Map<String, String> getProducerProps() {
@@ -79,8 +98,7 @@ public class UserConsumerServiceTestIT {
         consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumerProps.put("bootstrap.servers", kafkaContainer.getBootstrapServers());
         consumerProps.put("auto.offset.reset", "earliest");
-        consumerProps.put("group.id", "default-group");
-        consumerProps.put("client.id", "default-client");
+
         return consumerProps;
     }
 
