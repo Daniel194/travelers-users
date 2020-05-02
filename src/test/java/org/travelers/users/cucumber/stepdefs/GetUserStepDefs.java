@@ -5,7 +5,6 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -25,10 +24,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class GetUserStepDefs extends StepDefs {
 
-    @Autowired
-    private UserResource userResource;
+    private final UserResource userResource;
 
     private MockMvc restUserMockMvc;
+
+    public GetUserStepDefs(UserResource userResource) {
+        this.userResource = userResource;
+    }
 
     @Before
     public void setup() {
@@ -80,7 +82,6 @@ public class GetUserStepDefs extends StepDefs {
             .andExpect(jsonPath("$.email").value(user.getEmail()))
             .andExpect(jsonPath("$.imageUrl").value(user.getImageUrl()))
             .andExpect(jsonPath("$.description").value(user.getDescription()))
-            .andExpect(jsonPath("$.dateOfBirth").value(user.getDateOfBirth()))
             .andExpect(jsonPath("$.placeOfBirth").value(user.getPlaceOfBirth()));
     }
 
