@@ -5,14 +5,12 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.travelers.users.service.dto.UserDTO;
 import org.travelers.users.service.dto.UserDetailsDTO;
 import org.travelers.users.web.rest.UserResource;
@@ -23,13 +21,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.travelers.users.util.TestUtil.convertObjectToJson;
+import static org.travelers.users.util.TestUtil.convertObjectToJsonBytes;
 
 public class UpdateUserDetailsInformationStepDefs extends StepDefs {
 
+    private final UserResource userResource;
+
     private UserDetailsDTO userDetails;
 
-    @Autowired
-    private UserResource userResource;
+    public UpdateUserDetailsInformationStepDefs(UserResource userResource) {
+        this.userResource = userResource;
+    }
 
     @Given("user {string} wants to update detail information with the following attributes")
     public void user_wants_update_detail_information_with_attributes(String login, DataTable dataTable) {
@@ -48,11 +51,10 @@ public class UpdateUserDetailsInformationStepDefs extends StepDefs {
     @When("user update the account with the new detail information")
     public void user_update_account_with_detail_information() throws Exception {
         MockMvc restUserMockMvc = MockMvcBuilders.standaloneSetup(userResource).build();
-        ObjectMapper mapper = new ObjectMapper();
 
         actions = restUserMockMvc.perform(put("/api/user/details")
-            .accept(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(userDetails)));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(convertObjectToJsonBytes(userDetails)));
     }
 
     @Then("the update details is 'SUCCESSFUL'")
@@ -73,7 +75,6 @@ public class UpdateUserDetailsInformationStepDefs extends StepDefs {
             .andExpect(jsonPath("$.email").value(user.getEmail()))
             .andExpect(jsonPath("$.imageUrl").value(user.getImageUrl()))
             .andExpect(jsonPath("$.description").value(user.getDescription()))
-            .andExpect(jsonPath("$.dateOfBirth").value(user.getDateOfBirth()))
             .andExpect(jsonPath("$.placeOfBirth").value(user.getPlaceOfBirth()));
     }
 

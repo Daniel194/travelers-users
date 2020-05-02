@@ -11,6 +11,8 @@ import org.travelers.users.UsersApp;
 import org.travelers.users.domain.User;
 import org.travelers.users.repository.UserRepository;
 import org.travelers.users.service.dto.UserDTO;
+import org.travelers.users.service.dto.UserDetailsDTO;
+import org.travelers.users.service.mapper.UserMapper;
 
 import java.util.Optional;
 
@@ -27,6 +29,8 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private UserMapper userMapper;
 
     @Test
     public void getByLogin() {
@@ -46,9 +50,7 @@ public class UserServiceTest {
     public void getCurrent() {
         User user = getUser();
 
-        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(new UsernamePasswordAuthenticationToken(user.getLogin(), user.getLogin()));
-        SecurityContextHolder.setContext(securityContext);
+        setCurrentUser(user.getLogin());
 
         doReturn(Optional.of(user)).when(userRepository).findByLogin(user.getLogin());
 
@@ -58,6 +60,33 @@ public class UserServiceTest {
 
         verify(userRepository).findByLogin(user.getLogin());
         verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    public void update() {
+        UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
+        userDetailsDTO.setDescription("Test12345");
+
+        UserDTO userDTO = getUserDTO();
+        User user = getUser();
+
+        setCurrentUser(user.getLogin());
+
+        doReturn(Optional.of(user)).when(userRepository).findByLogin(user.getLogin());
+        doReturn(userDTO).when(userMapper).userToUserDTO(user);
+
+        userService.update(userDetailsDTO);
+
+        verify(userRepository).findByLogin(user.getLogin());
+        verify(userMapper).userToUserDTO(user);
+        verify(userRepository).save(user);
+        verifyNoMoreInteractions(userRepository, userMapper);
+    }
+
+    private void setCurrentUser(String login) {
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(new UsernamePasswordAuthenticationToken(login, login));
+        SecurityContextHolder.setContext(securityContext);
     }
 
 }
