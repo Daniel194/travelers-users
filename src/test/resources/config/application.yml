@@ -2,9 +2,6 @@
 # Spring Boot configuration.
 #
 # This configuration is used for unit/integration tests.
-#
-# More information on profiles: https://www.jhipster.tech/profiles/
-# More information on configuration properties: https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
 # ===================================================================
@@ -51,7 +48,7 @@ spring:
     execution:
       thread-name-prefix: users-task-
       pool:
-        core-size: 1
+        core-size: 5
         max-size: 50
         queue-capacity: 10000
     scheduling:
@@ -95,24 +92,21 @@ jhipster:
       report-frequency: 60 # in seconds
   cache:
     redis:
-      server: ${redis.test.server}
+      server: redis://localhost:6381
 kafka:
   bootstrap-servers: localhost:9092
   consumer:
     key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    group.id: users
     auto.offset.reset: earliest
   producer:
     key.serializer: org.apache.kafka.common.serialization.StringSerializer
     value.serializer: org.apache.kafka.common.serialization.StringSerializer
+
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
 # to have type-safe configuration, like in the JHipsterProperties above
-#
-# More documentation is available at:
-# https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
 # application:

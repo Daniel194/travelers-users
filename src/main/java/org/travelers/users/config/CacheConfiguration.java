@@ -1,10 +1,6 @@
 package org.travelers.users.config;
 
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.serviceregistry.Registration;
-import org.springframework.context.annotation.*;
 import org.redisson.Redisson;
 import org.redisson.config.Config;
 import org.redisson.jcache.configuration.RedissonConfiguration;
@@ -37,9 +33,7 @@ public class CacheConfiguration {
 
     @Bean
     public JCacheManagerCustomizer cacheManagerCustomizer(javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration) {
-        return cm -> {
-            // jhipster-needle-redis-add-entry
-        };
+        return cm -> createCache(cm, org.travelers.users.repository.UserRepository.USERS_BY_LOGIN_CACHE, jcacheConfiguration);
     }
 
     private void createCache(javax.cache.CacheManager cm, String cacheName, javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration) {

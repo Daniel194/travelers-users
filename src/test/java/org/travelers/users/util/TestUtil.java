@@ -1,33 +1,33 @@
-package org.travelers.users.web.rest;
+package org.travelers.users.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.http.MediaType;
+import org.travelers.users.domain.User;
+import org.travelers.users.service.dto.UserDTO;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Utility class for testing REST controllers.
- */
 public final class TestUtil {
 
     private static final ObjectMapper mapper = createObjectMapper();
-
-    /**
-     * MediaType for JSON
-     */
-    public static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
 
     private static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -37,24 +37,14 @@ public final class TestUtil {
         return mapper;
     }
 
-    /**
-     * Convert an object to JSON byte array.
-     *
-     * @param object the object to convert.
-     * @return the JSON byte array.
-     * @throws IOException
-     */
     public static byte[] convertObjectToJsonBytes(Object object) throws IOException {
         return mapper.writeValueAsBytes(object);
     }
 
-    /**
-     * Create a byte array with a specific size filled with specified data.
-     *
-     * @param size the size of the byte array.
-     * @param data the data to put in the byte array.
-     * @return the JSON byte array.
-     */
+    public static String convertObjectToJson(Object object) throws JsonProcessingException {
+        return mapper.writeValueAsString(object);
+    }
+
     public static byte[] createByteArray(int size, String data) {
         byte[] byteArray = new byte[size];
         for (int i = 0; i < size; i++) {
@@ -63,9 +53,6 @@ public final class TestUtil {
         return byteArray;
     }
 
-    /**
-     * A matcher that tests that the examined string represents the same instant as the reference datetime.
-     */
     public static class ZonedDateTimeMatcher extends TypeSafeDiagnosingMatcher<String> {
 
         private final ZonedDateTime date;
@@ -96,45 +83,101 @@ public final class TestUtil {
         }
     }
 
-    /**
-     * Creates a matcher that matches when the examined string represents the same instant as the reference datetime.
-     *
-     * @param date the reference datetime against which the examined string is checked.
-     */
     public static ZonedDateTimeMatcher sameInstant(ZonedDateTime date) {
         return new ZonedDateTimeMatcher(date);
     }
 
-    /**
-     * Verifies the equals/hashcode contract on the domain object.
-     */
     public static <T> void equalsVerifier(Class<T> clazz) throws Exception {
         T domainObject1 = clazz.getConstructor().newInstance();
         assertThat(domainObject1.toString()).isNotNull();
         assertThat(domainObject1).isEqualTo(domainObject1);
         assertThat(domainObject1.hashCode()).isEqualTo(domainObject1.hashCode());
-        // Test with an instance of another class
+
         Object testOtherObject = new Object();
         assertThat(domainObject1).isNotEqualTo(testOtherObject);
         assertThat(domainObject1).isNotEqualTo(null);
-        // Test with an instance of the same class
+
         T domainObject2 = clazz.getConstructor().newInstance();
         assertThat(domainObject1).isNotEqualTo(domainObject2);
-        // HashCodes are equals because the objects are not persisted yet
+
         assertThat(domainObject1.hashCode()).isEqualTo(domainObject2.hashCode());
     }
 
-    /**
-     * Create a {@link FormattingConversionService} which use ISO date format, instead of the localized one.
-     * @return the {@link FormattingConversionService}.
-     */
     public static FormattingConversionService createFormattingConversionService() {
-        DefaultFormattingConversionService dfcs = new DefaultFormattingConversionService ();
+        DefaultFormattingConversionService dfcs = new DefaultFormattingConversionService();
         DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
         registrar.setUseIsoFormat(true);
         registrar.registerFormatters(dfcs);
         return dfcs;
     }
 
-    private TestUtil() {}
+    public static User getUser() {
+        User user = new User();
+
+        user.setLogin(RandomStringUtils.randomAlphanumeric(5));
+        user.setFirstName(RandomStringUtils.randomAlphanumeric(5));
+        user.setLastName(RandomStringUtils.randomAlphanumeric(5));
+        user.setEmail(RandomStringUtils.randomAlphanumeric(5) + "@test.com");
+        user.setImageUrl(RandomStringUtils.randomAlphanumeric(5));
+        user.setDescription(RandomStringUtils.randomAlphanumeric(20));
+        user.setDateOfBirth(LocalDate.now());
+        user.setPlaceOfBirth(RandomStringUtils.randomAlphanumeric(3));
+        user.setSocialPlatforms(randomMap(3));
+        user.setVisitedCountries(randomIntegerMap(3));
+
+        return user;
+    }
+
+    public static UserDTO getUserDTO() {
+        UserDTO user = new UserDTO();
+
+        user.setLogin(StringUtils.lowerCase(RandomStringUtils.randomAlphanumeric(5)));
+        user.setFirstName(RandomStringUtils.randomAlphanumeric(5));
+        user.setLastName(RandomStringUtils.randomAlphanumeric(5));
+        user.setEmail(RandomStringUtils.randomAlphanumeric(5) + "@test.com");
+        user.setImageUrl(RandomStringUtils.randomAlphanumeric(5));
+        user.setDescription(RandomStringUtils.randomAlphanumeric(20));
+        user.setDateOfBirth(LocalDate.now());
+        user.setPlaceOfBirth(RandomStringUtils.randomAlphanumeric(3));
+        user.setSocialPlatforms(randomMap(3));
+        user.setVisitedCountries(randomIntegerMap(3));
+
+        return user;
+    }
+
+    public static Map<String, String> randomMap(int size) {
+        Map<String, String> map = new HashMap<>();
+
+        for (int i = 0; i < size; i++) {
+            map.put(RandomStringUtils.randomAlphanumeric(3), RandomStringUtils.randomAlphanumeric(3));
+        }
+
+        return map;
+    }
+
+    public static Map<String, Integer> randomIntegerMap(int size) {
+        Map<String, Integer> map = new HashMap<>();
+
+        for (int i = 0; i < size; i++) {
+            map.put(RandomStringUtils.randomAlphanumeric(3), ThreadLocalRandom.current().nextInt(1, 10));
+        }
+
+        return map;
+    }
+
+    public static boolean areEqual(User user, UserDTO userDTO) {
+        return userDTO.getLogin().equals(user.getLogin()) &&
+            userDTO.getFirstName().equals(user.getFirstName()) &&
+            userDTO.getLastName().equals(user.getLastName()) &&
+            userDTO.getEmail().equals(user.getEmail()) &&
+            userDTO.getImageUrl().equals(user.getImageUrl()) &&
+            userDTO.getDescription().equals(user.getDescription()) &&
+            userDTO.getDateOfBirth().equals(user.getDateOfBirth()) &&
+            userDTO.getPlaceOfBirth().equals(user.getPlaceOfBirth()) &&
+            userDTO.getSocialPlatforms().equals(user.getSocialPlatforms()) &&
+            userDTO.getVisitedCountries().equals(user.getVisitedCountries());
+    }
+
+    private TestUtil() {
+    }
 }
