@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.testcontainers.containers.KafkaContainer;
 import org.travelers.users.UsersApp;
 import org.travelers.users.config.KafkaProperties;
@@ -47,6 +48,9 @@ class UserConsumerServiceTest {
     @Mock
     private KafkaProperties kafkaProperties;
 
+    @Mock
+    private CacheManager cacheManager;
+
     @BeforeAll
     static void startServer() {
         kafkaContainer = new KafkaContainer("5.4.0");
@@ -74,7 +78,8 @@ class UserConsumerServiceTest {
         verify(userMapper).userDTOToUser(userDTO);
         verify(userRepository).save(user);
         verify(userSearchRepository).save(user);
-        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository);
+        verify(cacheManager).getCache(UserRepository.USERS_BY_LOGIN_CACHE);
+        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository, cacheManager);
     }
 
     @Test
@@ -98,7 +103,8 @@ class UserConsumerServiceTest {
         verify(userRepository).findByLogin(userDTO.getLogin());
         verify(userRepository).save(user);
         verify(userSearchRepository).save(user);
-        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository);
+        verify(cacheManager).getCache(UserRepository.USERS_BY_LOGIN_CACHE);
+        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository, cacheManager);
     }
 
     @Test
@@ -142,7 +148,8 @@ class UserConsumerServiceTest {
         verify(userRepository).findByLogin(countryDTO.getLogin());
         verify(userRepository).save(user);
         verify(userSearchRepository).save(user);
-        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository);
+        verify(cacheManager).getCache(UserRepository.USERS_BY_LOGIN_CACHE);
+        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository, cacheManager);
     }
 
     @Test
@@ -158,7 +165,8 @@ class UserConsumerServiceTest {
         verify(kafkaProperties, atLeast(1)).getConsumerProps();
         verify(userRepository).deleteByLogin("test");
         verify(userSearchRepository).deleteByLogin("test");
-        verifyNoMoreInteractions(kafkaProperties, userRepository, userSearchRepository);
+        verify(cacheManager).getCache(UserRepository.USERS_BY_LOGIN_CACHE);
+        verifyNoMoreInteractions(kafkaProperties, userRepository, userSearchRepository, cacheManager);
     }
 
     private Map<String, Object> getProducerProps() {

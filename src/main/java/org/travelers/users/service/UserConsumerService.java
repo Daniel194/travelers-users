@@ -5,6 +5,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.travelers.users.config.KafkaProperties;
 import org.travelers.users.domain.User;
@@ -28,6 +30,7 @@ public class UserConsumerService {
     private final UserSearchRepository userSearchRepository;
     private final KafkaProperties kafkaProperties;
     private final UserMapper userMapper;
+    private final CacheManager cacheManager;
 
     private KafkaConsumer<String, String> createNewUser;
     private KafkaConsumer<String, String> updateUser;
@@ -36,11 +39,16 @@ public class UserConsumerService {
     private KafkaConsumer<String, String> deleteUser;
 
     @Autowired
-    public UserConsumerService(UserRepository userRepository, UserSearchRepository userSearchRepository, KafkaProperties kafkaProperties, UserMapper userMapper) {
+    public UserConsumerService(UserRepository userRepository,
+                               UserSearchRepository userSearchRepository,
+                               KafkaProperties kafkaProperties,
+                               UserMapper userMapper,
+                               CacheManager cacheManager) {
         this.userRepository = userRepository;
         this.userSearchRepository = userSearchRepository;
         this.kafkaProperties = kafkaProperties;
         this.userMapper = userMapper;
+        this.cacheManager = cacheManager;
     }
 
     @PostConstruct
@@ -86,6 +94,7 @@ public class UserConsumerService {
 
             userRepository.save(user);
             userSearchRepository.save(user);
+            clearUserCaches(user.getLogin());
 
         } catch (Exception ex) {
             log.trace("ERROR create-new-user: {}", ex.getMessage(), ex);
@@ -110,6 +119,7 @@ public class UserConsumerService {
 
             userRepository.save(user);
             userSearchRepository.save(user);
+            clearUserCaches(user.getLogin());
 
         } catch (Exception ex) {
             log.trace("ERROR update-user: {}", ex.getMessage(), ex);
@@ -138,6 +148,7 @@ public class UserConsumerService {
 
             userRepository.save(user);
             userSearchRepository.save(user);
+            clearUserCaches(user.getLogin());
 
         } catch (Exception ex) {
             log.trace("ERROR add-country: {}", ex.getMessage(), ex);
@@ -167,6 +178,7 @@ public class UserConsumerService {
 
             userRepository.save(user);
             userSearchRepository.save(user);
+            clearUserCaches(user.getLogin());
 
         } catch (Exception ex) {
             log.trace("ERROR remove-country: {}", ex.getMessage(), ex);
@@ -181,9 +193,18 @@ public class UserConsumerService {
         try {
             userRepository.deleteByLogin(login);
             userSearchRepository.deleteByLogin(login);
+            clearUserCaches(login);
 
         } catch (Exception ex) {
             log.trace("ERROR update-user: {}", ex.getMessage(), ex);
+        }
+    }
+
+    private void clearUserCaches(String login) {
+        Cache cache = cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE);
+
+        if(cache != null) {
+            cache.evict(login);
         }
     }
 

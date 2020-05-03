@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +40,9 @@ public class UserServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private CacheManager cacheManager;
 
     @Test
     public void getByLogin() {
@@ -89,7 +93,8 @@ public class UserServiceTest {
         verify(userMapper).userToUserDTO(user);
         verify(userRepository).save(user);
         verify(userSearchRepository).save(user);
-        verifyNoMoreInteractions(userRepository, userMapper, userSearchRepository);
+        verify(cacheManager).getCache(UserRepository.USERS_BY_LOGIN_CACHE);
+        verifyNoMoreInteractions(userRepository, userMapper, userSearchRepository, cacheManager);
     }
 
     private void setCurrentUser(String login) {

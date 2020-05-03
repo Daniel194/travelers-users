@@ -1,6 +1,8 @@
 package org.travelers.users.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.travelers.users.domain.User;
@@ -23,12 +25,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserSearchRepository userSearchRepository;
+    private final CacheManager cacheManager;
     private final UserMapper userMapper;
 
     @Autowired
-    public UserService(UserRepository userRepository, UserSearchRepository userSearchRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository,
+                       UserSearchRepository userSearchRepository,
+                       CacheManager cacheManager,
+                       UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userSearchRepository = userSearchRepository;
+        this.cacheManager = cacheManager;
         this.userMapper = userMapper;
     }
 
@@ -53,6 +60,7 @@ public class UserService {
 
         userRepository.save(user);
         userSearchRepository.save(user);
+        clearUserCaches(user.getLogin());
 
         return Optional.of(userMapper.userToUserDTO(user));
     }
@@ -62,6 +70,14 @@ public class UserService {
             .stream(userSearchRepository.search(queryStringQuery(query)).spliterator(), false)
             .map(UserDTO::new)
             .collect(Collectors.toList());
+    }
+
+    private void clearUserCaches(String login) {
+        Cache cache = cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE);
+
+        if (cache != null) {
+            cache.evict(login);
+        }
     }
 
 }
