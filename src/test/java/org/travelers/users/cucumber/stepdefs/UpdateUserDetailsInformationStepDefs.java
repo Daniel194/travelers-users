@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.travelers.users.util.TestUtil.convertObjectToJson;
 import static org.travelers.users.util.TestUtil.convertObjectToJsonBytes;
 
 public class UpdateUserDetailsInformationStepDefs extends StepDefs {
