@@ -33,9 +33,7 @@ public class CacheConfiguration {
 
     @Bean
     public JCacheManagerCustomizer cacheManagerCustomizer(javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration) {
-        return cm -> {
-            createCache(cm, org.travelers.users.repository.UserRepository.USERS_BY_LOGIN_CACHE, jcacheConfiguration);
-        };
+        return cm -> createCache(cm, org.travelers.users.repository.UserRepository.USERS_BY_LOGIN_CACHE, jcacheConfiguration);
     }
 
     private void createCache(javax.cache.CacheManager cm, String cacheName, javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration) {

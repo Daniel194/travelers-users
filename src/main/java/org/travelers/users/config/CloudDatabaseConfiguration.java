@@ -69,9 +69,9 @@ public class CloudDatabaseConfiguration extends AbstractCloudConfig {
         Mongobee mongobee = new Mongobee(info.getUri());
         mongobee.setDbName(mongoDbFactory.getDb().getName());
         mongobee.setMongoTemplate(mongoTemplate);
-        // package to scan for migrations
         mongobee.setChangeLogsScanPackage("org.travelers.users.config.dbmigrations");
         mongobee.setEnabled(true);
+
         return mongobee;
     }
 }
