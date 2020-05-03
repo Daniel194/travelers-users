@@ -13,6 +13,7 @@ import org.travelers.users.UsersApp;
 import org.travelers.users.config.KafkaProperties;
 import org.travelers.users.domain.User;
 import org.travelers.users.repository.UserRepository;
+import org.travelers.users.repository.search.UserSearchRepository;
 import org.travelers.users.service.dto.CountryDTO;
 import org.travelers.users.service.dto.UserDTO;
 import org.travelers.users.service.mapper.UserMapper;
@@ -35,6 +36,9 @@ public class UserConsumerServiceTestIT {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private UserSearchRepository userSearchRepository;
+
     private UserConsumerService userConsumerService;
 
     @BeforeAll
@@ -49,7 +53,7 @@ public class UserConsumerServiceTestIT {
         kafkaProperties.setProducer(getProducerProps());
         kafkaProperties.setConsumer(getConsumerProps());
 
-        userConsumerService = new UserConsumerService(userRepository, kafkaProperties, userMapper);
+        userConsumerService = new UserConsumerService(userRepository, userSearchRepository, kafkaProperties, userMapper);
         userConsumerService.setUp();
     }
 
@@ -122,11 +126,16 @@ public class UserConsumerServiceTestIT {
         userConsumerService.consumeRemoveCountry();
 
         User newUser = userRepository.findByLogin(user.getLogin()).orElse(new User());
-        Integer newCount = user.getVisitedCountries().get(country.getCountry()) - 1;
+        int newCount = user.getVisitedCountries().get(country.getCountry()) - 1;
 
         assertThat(newUser.getLogin()).isEqualTo(country.getLogin());
-        assertThat(newUser.getVisitedCountries().get(country.getCountry())).isNotNull();
-        assertThat(newUser.getVisitedCountries().get(country.getCountry())).isEqualTo(newCount);
+
+        if (newCount == 0) {
+            assertThat(newUser.getVisitedCountries().get(country.getCountry())).isNull();
+        } else {
+            assertThat(newUser.getVisitedCountries().get(country.getCountry())).isNotNull();
+            assertThat(newUser.getVisitedCountries().get(country.getCountry())).isEqualTo(newCount);
+        }
     }
 
     @Test

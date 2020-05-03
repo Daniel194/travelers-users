@@ -13,6 +13,7 @@ import org.travelers.users.UsersApp;
 import org.travelers.users.config.KafkaProperties;
 import org.travelers.users.domain.User;
 import org.travelers.users.repository.UserRepository;
+import org.travelers.users.repository.search.UserSearchRepository;
 import org.travelers.users.service.dto.CountryDTO;
 import org.travelers.users.service.dto.UserDTO;
 import org.travelers.users.service.mapper.UserMapper;
@@ -36,6 +37,9 @@ class UserConsumerServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserSearchRepository userSearchRepository;
 
     @Mock
     private UserMapper userMapper;
@@ -69,7 +73,8 @@ class UserConsumerServiceTest {
         verify(userMapper).mapToUser(any(String.class));
         verify(userMapper).userDTOToUser(userDTO);
         verify(userRepository).save(user);
-        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository);
+        verify(userSearchRepository).save(user);
+        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository);
     }
 
     @Test
@@ -92,7 +97,8 @@ class UserConsumerServiceTest {
         verify(userMapper).mapToUser(any(String.class));
         verify(userRepository).findByLogin(userDTO.getLogin());
         verify(userRepository).save(user);
-        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository);
+        verify(userSearchRepository).save(user);
+        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository);
     }
 
     @Test
@@ -135,7 +141,8 @@ class UserConsumerServiceTest {
         verify(userMapper).mapToCountry(any(String.class));
         verify(userRepository).findByLogin(countryDTO.getLogin());
         verify(userRepository).save(user);
-        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository);
+        verify(userSearchRepository).save(user);
+        verifyNoMoreInteractions(kafkaProperties, userMapper, userRepository, userSearchRepository);
     }
 
     @Test
@@ -150,7 +157,8 @@ class UserConsumerServiceTest {
 
         verify(kafkaProperties, atLeast(1)).getConsumerProps();
         verify(userRepository).deleteByLogin("test");
-        verifyNoMoreInteractions(kafkaProperties, userRepository);
+        verify(userSearchRepository).deleteByLogin("test");
+        verifyNoMoreInteractions(kafkaProperties, userRepository, userSearchRepository);
     }
 
     private Map<String, Object> getProducerProps() {

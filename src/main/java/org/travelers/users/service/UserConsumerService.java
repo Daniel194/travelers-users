@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.travelers.users.config.KafkaProperties;
 import org.travelers.users.domain.User;
 import org.travelers.users.repository.UserRepository;
+import org.travelers.users.repository.search.UserSearchRepository;
 import org.travelers.users.service.dto.CountryDTO;
 import org.travelers.users.service.dto.UserDTO;
 import org.travelers.users.service.mapper.UserMapper;
@@ -24,6 +25,7 @@ public class UserConsumerService {
     private final Logger log = LoggerFactory.getLogger(UserConsumerService.class);
 
     private final UserRepository userRepository;
+    private final UserSearchRepository userSearchRepository;
     private final KafkaProperties kafkaProperties;
     private final UserMapper userMapper;
 
@@ -34,8 +36,9 @@ public class UserConsumerService {
     private KafkaConsumer<String, String> deleteUser;
 
     @Autowired
-    public UserConsumerService(UserRepository userRepository, KafkaProperties kafkaProperties, UserMapper userMapper) {
+    public UserConsumerService(UserRepository userRepository, UserSearchRepository userSearchRepository, KafkaProperties kafkaProperties, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userSearchRepository = userSearchRepository;
         this.kafkaProperties = kafkaProperties;
         this.userMapper = userMapper;
     }
@@ -77,11 +80,12 @@ public class UserConsumerService {
         createNewUser.poll(Duration.ofSeconds(1)).forEach(record -> createNewUser(record.value()));
     }
 
-    private void createNewUser(String user) {
+    private void createNewUser(String userJson) {
         try {
-            UserDTO userDTO = userMapper.mapToUser(user);
+            User user = userMapper.userDTOToUser(userMapper.mapToUser(userJson));
 
-            userRepository.save(userMapper.userDTOToUser(userDTO));
+            userRepository.save(user);
+            userSearchRepository.save(user);
 
         } catch (Exception ex) {
             log.trace("ERROR create-new-user: {}", ex.getMessage(), ex);
@@ -105,6 +109,7 @@ public class UserConsumerService {
             user.setImageUrl(userDTO.getImageUrl());
 
             userRepository.save(user);
+            userSearchRepository.save(user);
 
         } catch (Exception ex) {
             log.trace("ERROR update-user: {}", ex.getMessage(), ex);
@@ -132,6 +137,7 @@ public class UserConsumerService {
             user.setVisitedCountries(visitedCountries);
 
             userRepository.save(user);
+            userSearchRepository.save(user);
 
         } catch (Exception ex) {
             log.trace("ERROR add-country: {}", ex.getMessage(), ex);
@@ -160,6 +166,7 @@ public class UserConsumerService {
             }
 
             userRepository.save(user);
+            userSearchRepository.save(user);
 
         } catch (Exception ex) {
             log.trace("ERROR remove-country: {}", ex.getMessage(), ex);
@@ -173,6 +180,7 @@ public class UserConsumerService {
     private void deleteUSer(String login) {
         try {
             userRepository.deleteByLogin(login);
+            userSearchRepository.deleteByLogin(login);
 
         } catch (Exception ex) {
             log.trace("ERROR update-user: {}", ex.getMessage(), ex);
