@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.testcontainers.containers.KafkaContainer;
 import org.travelers.users.UsersApp;
 import org.travelers.users.config.KafkaProperties;
@@ -39,6 +40,9 @@ public class UserConsumerServiceTestIT {
     @Autowired
     private UserSearchRepository userSearchRepository;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     private UserConsumerService userConsumerService;
 
     @BeforeAll
@@ -53,7 +57,7 @@ public class UserConsumerServiceTestIT {
         kafkaProperties.setProducer(getProducerProps());
         kafkaProperties.setConsumer(getConsumerProps());
 
-        userConsumerService = new UserConsumerService(userRepository, userSearchRepository, kafkaProperties, userMapper);
+        userConsumerService = new UserConsumerService(userRepository, userSearchRepository, kafkaProperties, userMapper, cacheManager);
         userConsumerService.setUp();
     }
 

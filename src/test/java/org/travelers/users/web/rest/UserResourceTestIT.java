@@ -1,10 +1,12 @@
 package org.travelers.users.web.rest;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -13,8 +15,7 @@ import org.travelers.users.domain.User;
 import org.travelers.users.repository.UserRepository;
 import org.travelers.users.service.dto.UserDetailsDTO;
 
-import java.time.LocalDate;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -33,10 +34,20 @@ class UserResourceTestIT {
     @Autowired
     private MockMvc restUserMockMvc;
 
+    @Autowired
+    private CacheManager cacheManager;
+
+    @BeforeEach
+    public void setup() {
+        cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).clear();
+    }
+
     @Test
     public void getExistingUser() throws Exception {
         User user = getUser();
         userRepository.save(user);
+
+        assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNull();
 
         restUserMockMvc.perform(get("/api/user/" + user.getLogin())
             .accept(MediaType.APPLICATION_JSON))
@@ -50,6 +61,7 @@ class UserResourceTestIT {
             .andExpect(jsonPath("$.description").value(user.getDescription()))
             .andExpect(jsonPath("$.placeOfBirth").value(user.getPlaceOfBirth()));
 
+        assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNotNull();
     }
 
     @Test
@@ -65,6 +77,8 @@ class UserResourceTestIT {
         user.setLogin(TEST_USER_LOGIN);
         userRepository.save(user);
 
+        assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNull();
+
         restUserMockMvc.perform(get("/api/user")
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -76,6 +90,8 @@ class UserResourceTestIT {
             .andExpect(jsonPath("$.imageUrl").value(user.getImageUrl()))
             .andExpect(jsonPath("$.description").value(user.getDescription()))
             .andExpect(jsonPath("$.placeOfBirth").value(user.getPlaceOfBirth()));
+
+        assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNotNull();
     }
 
     @Test
