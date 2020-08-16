@@ -19,6 +19,7 @@ import org.travelers.users.service.mapper.UserMapper;
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -138,6 +139,11 @@ public class UserConsumerService {
                 .orElseThrow(() -> new Exception("User " + countryDTO.getLogin() + " not found"));
 
             Map<String, Integer> visitedCountries = user.getVisitedCountries();
+
+            if (visitedCountries == null) {
+                visitedCountries = new HashMap<>();
+            }
+
             Integer count = visitedCountries.get(countryDTO.getCountry());
 
             count = count == null ? 1 : ++count;
@@ -203,7 +209,7 @@ public class UserConsumerService {
     private void clearUserCaches(String login) {
         Cache cache = cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE);
 
-        if(cache != null) {
+        if (cache != null) {
             cache.evict(login);
         }
     }
